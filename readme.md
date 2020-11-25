@@ -20,6 +20,8 @@
 
 代码只给出了2.0版本  
 
+如何在Google Chrome里使用该插件请参考: https://www.cnblogs.com/zp106/p/12700114.html
+
 程序截图:  
 [1](./程序截图/1.png)
 [2](./程序截图/2.png)
