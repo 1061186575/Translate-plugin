@@ -7,6 +7,7 @@ const output = document.getElementById('output');
 const collect = document.getElementById('collect'); // 单词收藏
 const collect_success = document.getElementById('collect-success');
 let timer;
+let isShowParaphrase = false; // 是否显示释义
 
 //导出, 会导出两份文件, .txt文件用于阅读, .json文件用于导入
 document.getElementById("export-btn").onclick = function () {
@@ -134,12 +135,12 @@ collect.onclick = function () {
 // 显示收藏的单词
 function render_collect_word() {
     let wordHTML = '';
-    for (var i = 0; i < wordList.length; i++) {
+    for (let i = 0; i < wordList.length; i++) {
         let {k: key, v: value} = wordList[i];
         wordHTML += `
-            <div>
+            <div class="showSingleParaphrase">
                 <span class="key">${key}:</span>
-                <span class="value">${value}</span>
+                <span class="value" style="display: ${isShowParaphrase ? '' : 'none'};">${value}</span>
                 <button data-key="${key}" class="deleteWord floatR" style="color: #F44336;">删除</button>
                 <br clear="both">
                 <hr>
@@ -160,11 +161,31 @@ $(document).delegate('.deleteWord', 'click', function () {
         if (wordList[i].k === key) {
             wordList.splice(i, 1);
             i--;// 删除数组元素后wordList.length会减一, 所以让i也减一
+            this.parentElement.remove(); // 从dom中移除
         }
     }
     localStorage.setItem("wordList", JSON.stringify(wordList));
-    render_collect_word();
 });
+
+
+// 显示单个释义
+$(document).delegate('.showSingleParaphrase', 'click', function () {
+    this.children[1].style.display = ''
+});
+
+
+// 显示与隐藏全部释义
+let paraphraseBtn = document.getElementById('paraphrase-btn');
+paraphraseBtn.onclick = function() {
+    if (isShowParaphrase) {
+        paraphraseBtn.innerText = '显示释义';
+    } else {
+        paraphraseBtn.innerText = '隐藏释义';
+    }
+    isShowParaphrase = !isShowParaphrase;
+    render_collect_word();
+}
+
 
 
 // 初始化自动发音的状态并储存到localStorage
