@@ -8,6 +8,7 @@ const collect = document.getElementById('collect'); // 单词收藏
 const collect_success = document.getElementById('collect-success');
 let timer;
 let isShowParaphrase = false; // 是否显示释义
+let globalSpeakUrl = '';
 
 //导出, 会导出两份文件, .txt文件用于阅读, .json文件用于导入
 document.getElementById("export-btn").onclick = function () {
@@ -121,7 +122,8 @@ collect.onclick = function () {
     // 如果要保证k唯一,在unshift之前应该先遍历wordList查找该k是否已经存在,这里我就不保证k唯一了
     wordList.unshift({
         k: input.value.trim(),
-        v: output.value.trim()
+        v: output.value.trim(),
+        speakUrl: globalSpeakUrl
     })
     localStorage.setItem("wordList", JSON.stringify(wordList))
     collect_success.style.visibility = 'visible'; // 显示"收藏成功"
@@ -136,16 +138,15 @@ collect.onclick = function () {
 function render_collect_word() {
     let wordHTML = '';
     for (let i = 0; i < wordList.length; i++) {
-        let {k: key, v: value} = wordList[i];
+        let {k: key, v: value, speakUrl} = wordList[i];
         wordHTML += `
             <div class="showSingleParaphrase">
-                <span class="key">${key}:</span>
+                <span class="key" data-speakUrl="${speakUrl || ''}">${key}:</span>
                 <span class="value" style="display: ${isShowParaphrase ? '' : 'none'};">${value}</span>
                 <button data-key="${key}" class="deleteWord floatR" style="color: #F44336;">删除</button>
                 <br clear="both">
                 <hr>
             </div>`
-
     }
     document.getElementById('showCollectWord').innerHTML = wordHTML;
 }
@@ -154,7 +155,7 @@ render_collect_word();
 
 
 // 删除收藏的单词
-$(document).delegate('.deleteWord', 'click', function () {
+$(document).delegate('.showSingleParaphrase > .deleteWord', 'click', function () {
     let key = this.dataset.key;
     // 相同的key都会删除不止删除一个
     for (let i = 0; i < wordList.length; i++) {
@@ -168,15 +169,24 @@ $(document).delegate('.deleteWord', 'click', function () {
 });
 
 
-// 显示单个释义
+// 显示与隐藏单个释义
 $(document).delegate('.showSingleParaphrase', 'click', function () {
-    this.children[1].style.display = ''
+    if (this.children[1].style.display) {
+        this.children[1].style.display = '';
+    } else {
+        this.children[1].style.display = 'none';
+    }
+});
+
+$(document).delegate('.showSingleParaphrase > .key', 'click', function (e) {
+    e.stopPropagation();
+    pronunciation(this.dataset.speakurl);
 });
 
 
 // 显示与隐藏全部释义
 let paraphraseBtn = document.getElementById('paraphrase-btn');
-paraphraseBtn.onclick = function() {
+paraphraseBtn.onclick = function () {
     if (isShowParaphrase) {
         paraphraseBtn.innerText = '显示释义';
     } else {
@@ -185,7 +195,6 @@ paraphraseBtn.onclick = function() {
     isShowParaphrase = !isShowParaphrase;
     render_collect_word();
 }
-
 
 
 // 初始化自动发音的状态并储存到localStorage
@@ -213,17 +222,17 @@ translate.onclick = function () {
 
 function changePronunciationBtnText() {
     if (is_auto_pronunciation === 'true') {
-        auto_pronunciation.textContent = '自动发音: 开';
+        auto_pronunciation.textContent = '允许发音: 开';
         auto_pronunciation.style.backgroundColor = 'rgb(50, 226, 203)';
     } else {
-        auto_pronunciation.textContent = '自动发音: 关';
+        auto_pronunciation.textContent = '允许发音: 关';
         auto_pronunciation.style.backgroundColor = 'rgb(169, 169, 169)';
     }
 }
 
 changePronunciationBtnText();
 
-// 自动翻译的开关
+// 自动发音的开关
 auto_pronunciation.onclick = function () {
     if (is_auto_pronunciation === 'true') {
         is_auto_pronunciation = 'false'
@@ -240,6 +249,8 @@ async function translateFun() {
     // console.log(result);
     // console.log(result.speakUrl); // 翻译前的语音
     // console.log(result.tSpeakUrl); // 翻译后的语音
+
+    globalSpeakUrl = result.speakUrl;
 
     if (result.basic && result.basic.explains) {
         let value = "";
@@ -260,7 +271,6 @@ function pronunciation(speakUrl) {
     if (is_auto_pronunciation === 'true' && speakUrl) {
         let audio = document.createElement('audio');
         audio.src = speakUrl;
-        audio.hidden = true;
         audio.play();
         audio = null;
     }

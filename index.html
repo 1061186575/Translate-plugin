@@ -72,8 +72,10 @@
 
     #showCollectWord .key {
       color: red;
-      width: 100px;
+      /* width: 100px; */
       display: inline-block;
+      cursor: pointer;
+      margin-right: 20px;
     }
 
     #showCollectWord .value {
@@ -102,7 +104,7 @@
     <div id="collect-success" style="visibility: hidden;color: #03A9F4;margin: 10px 0;">收藏成功</div>
     <button id="collect">收藏</button>
     <button id="translate">翻译</button>
-    <button id="auto-pronunciation">自动发音: 开</button>
+    <button id="auto-pronunciation">允许发音: 开</button> <!-- 自动发音 改成了=> 允许发音 -->
 
     <div>
       <input type="file" id="import-file" accept="application/json" style="display: none;"></input>
