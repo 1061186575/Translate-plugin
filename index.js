@@ -10,6 +10,10 @@ let timer;
 let isShowParaphrase = false; // 是否显示释义
 let globalSpeakUrl = '';
 
+
+console.log(formatDate());
+
+
 //导出, 会导出两份文件, .txt文件用于阅读, .json文件用于导入
 document.getElementById("export-btn").onclick = function () {
     let content = "";
@@ -47,7 +51,7 @@ document.getElementById("import-btn").onclick = function () {
     document.getElementById("import-file").click();
 }
 
-// 导入
+// 导入, 允许导入json文件和txt文件
 document.getElementById("import-file").addEventListener("change", function (e) {
 
     var file = e.target.files[0];
@@ -87,8 +91,8 @@ document.getElementById("import-file").addEventListener("change", function (e) {
             let importData = JSON.parse(data);
             console.log(importData);
             for (let i = 0; i < importData.length; i++) {
-                let {k: key, v: value} = importData[i];
-                uniqueImport(key, value)
+                let {k: key, v: value, speakUrl} = importData[i];
+                uniqueImport(key, value, speakUrl)
             }
         } catch (e) {
             alert('json文件格式错误, 无法导入');
@@ -96,7 +100,7 @@ document.getElementById("import-file").addEventListener("change", function (e) {
     }
 
     // 如果导入的key不存在于wordList才导入
-    function uniqueImport(key, value) {
+    function uniqueImport(key, value, speakUrl) {
         if (!key) return;
 
         let hasSameKey = false;
@@ -110,7 +114,8 @@ document.getElementById("import-file").addEventListener("change", function (e) {
         if (!hasSameKey) {
             wordList.unshift({
                 k: key,
-                v: value
+                v: value,
+				speakUrl
             })
         }
     }
